@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/DISourceGenerator.Library/DISourceGenerator.Library.csproj" Id="9c53538b-2baa-495d-81e2-55802293ca99" />
+  </Folder>
+  <Folder Name="/tests/" />
+</Solution>
