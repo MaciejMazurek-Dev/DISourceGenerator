@@ -3,6 +3,6 @@
     <Project Path="src/DISourceGenerator.Library/DISourceGenerator.Library.csproj" Id="9c53538b-2baa-495d-81e2-55802293ca99" />
   </Folder>
   <Folder Name="/tests/">
-    <Project Path="tests/ConsoleApp.Tests/ConsoleApp.Tests.csproj" Id="f44648fc-1e74-423c-819a-370d166600b3" />
+    <Project Path="tests/DISourceGenerator.Tests/DISourceGenerator.Tests.csproj" Id="3a951220-7028-4c3f-bb94-2ba1a645b152" />
   </Folder>
 </Solution>
