@@ -3,6 +3,7 @@ using Microsoft.CodeAnalysis.CSharp;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using System.Collections.Immutable;
 using System.Linq;
+using System.Text;
 
 namespace DISourceGenerator.Library;
 
@@ -36,16 +37,13 @@ public class SourceGenerator : IIncrementalGenerator
         IncrementalValuesProvider<ClassToGenerate?> classesToGenerate = initContext.SyntaxProvider.CreateSyntaxProvider(
             predicate: (syntaxNode, _) => IsNodeForGeneration(syntaxNode),
             transform: (syntaxContext, _) => GetClassToGenerate(syntaxContext))
-            .Where( c => c is not null);
+            .Where(c => c is not null);
             
 
         // Generate source code
         initContext.RegisterSourceOutput(classesToGenerate, (spc, source) =>
         {
-            if (source is not null)
-            {
-                spc.AddSource("NewGeneratedFile.g.cs", $"//{source.Value.Name}//auto-generated lalalala");
-            }
+                GenerateCode(spc, source);
         });
     }
 
@@ -85,5 +83,25 @@ public class SourceGenerator : IIncrementalGenerator
             return new ClassToGenerate(classData.Name);
         }
         return null;
+    }
+
+    private static void GenerateCode(SourceProductionContext spc, ClassToGenerate? classToGenerate)
+    {
+        if (classToGenerate is { } classData)
+        {
+            StringBuilder stringBuilder = new();
+
+// Template for generating source code
+//----------------------------------
+            stringBuilder.Append(@"
+// auto-generated
+public partial ").Append(classData.Name).Append(@"
+{
+    // Rumpology
+}");
+//-----------------------------------
+
+            spc.AddSource($"{classData.Name}.g.cs", stringBuilder.ToString());
+         }
     }
 }

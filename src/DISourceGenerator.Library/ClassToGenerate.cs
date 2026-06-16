@@ -4,9 +4,9 @@
     {
         public readonly string Name;
 
-        public ClassToGenerate(string name)
+        public ClassToGenerate(string className)
         {
-            Name = name;   
+            Name = className;
         }
     }
 }
