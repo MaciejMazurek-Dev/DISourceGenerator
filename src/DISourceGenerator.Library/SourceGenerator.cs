@@ -14,10 +14,13 @@ public class SourceGenerator : IIncrementalGenerator
         // Add marker attribute 
         initContext.RegisterPostInitializationOutput(callback =>
         {
-            const string markerAttribute = @"   
-                                                [AttributeUsage(AttributeTargets.Class)]
-                                                public class MarkerAttribute : Attribute
+            const string markerAttribute = @"// auto-generated
+                                                using System;
+                                                namespace DISourceGenerator.Library
                                                 {
+                                                [AttributeUsage(System.AttributeTargets.Class)]
+                                                public class MarkerAttribute : Attribute
+                                                { }
                                                 }
                                             ";
             callback.AddSource("MarkerAttribute.g.cs", markerAttribute);
@@ -30,41 +33,57 @@ public class SourceGenerator : IIncrementalGenerator
         // Fires up everytime when change in source code is made
         // Transform:
         // Runs when predicate returns TRUE
-        var markers = initContext.SyntaxProvider.CreateSyntaxProvider(
-            predicate: (syntaxNode, _) =>
-            {
-                string name = string.Empty;
-                if(syntaxNode is not AttributeSyntax attribute)
-                {
-                    return false;
-                }
-                if(attribute.Name is SimpleNameSyntax sns)
-                {
-                    name = sns.Identifier.Text;
-                }
-                else if(attribute.Name is QualifiedNameSyntax qns)
-                {
-                    name = qns.Right.Identifier.Text;
-                }
-
-                if(name == "Marker")
-                {
-                    return true;
-                }
-                return false;
-            },
-            transform: (syntaxContext, _) =>
-            {
-                if(syntaxContext.Node.Parent is not ClassDeclarationSyntax classSyntax)
-                {
-                    return null;
-                }
-                var classSemantic = syntaxContext.SemanticModel.GetDeclaredSymbol(classSyntax);
-
-                return classSemantic?.GetAttributes().Any();
-            });
+        IncrementalValuesProvider<ClassToGenerate?> classesToGenerate = initContext.SyntaxProvider.CreateSyntaxProvider(
+            predicate: (syntaxNode, _) => IsNodeForGeneration(syntaxNode),
+            transform: (syntaxContext, _) => GetClassToGenerate(syntaxContext))
+            .Where( c => c is not null);
+            
 
         // Generate source code
+        initContext.RegisterSourceOutput(classesToGenerate, (spc, source) =>
+        {
+            if (source is not null)
+            {
+                spc.AddSource("NewGeneratedFile.g.cs", $"//{source.Value.Name}//auto-generated lalalala");
+            }
+        });
     }
 
+    private static bool IsNodeForGeneration(SyntaxNode node)
+    {
+        string name = string.Empty;
+        if (node is not AttributeSyntax attribute)
+        {
+            return false;
+        }
+        if (attribute.Name is SimpleNameSyntax sns)
+        {
+            name = sns.Identifier.Text;
+        }
+        else if (attribute.Name is QualifiedNameSyntax qns)
+        {
+            name = qns.Right.Identifier.Text;
+        }
+
+        if (name == "Marker")
+        {
+            return true;
+        }
+        return false;
+    }
+
+    private static ClassToGenerate? GetClassToGenerate(GeneratorSyntaxContext context)
+    {
+        if (context.Node.Parent?.Parent is not ClassDeclarationSyntax classSyntax)
+        {
+            return null;
+        }
+
+        var classData = context.SemanticModel.GetDeclaredSymbol(classSyntax);
+        if(classData is not null)
+        {
+            return new ClassToGenerate(classData.Name);
+        }
+        return null;
+    }
 }

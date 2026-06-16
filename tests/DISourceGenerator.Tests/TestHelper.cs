@@ -8,7 +8,6 @@ using System.Runtime.CompilerServices;
 [assembly: CaptureConsole]
 namespace DISourceGenerator.Tests
 {
-
     public static class TestHelper
     {
         [ModuleInitializer]
@@ -20,7 +19,7 @@ namespace DISourceGenerator.Tests
             // Parse source code into syntax tree
             SyntaxTree syntaxTree = CSharpSyntaxTree.ParseText(sourceCode);
 
-            // Get reference to .NET runtime library 
+            // Get reference of .NET runtime library 
             IEnumerable <PortableExecutableReference> references = new[]
                 {
                     MetadataReference.CreateFromFile(typeof(System.Object).Assembly.Location),
@@ -34,11 +33,11 @@ namespace DISourceGenerator.Tests
 
             // Display compilation errors
             ImmutableArray<Diagnostic> diagnostic = compilation.GetDiagnostics();
-            foreach(var diag in diagnostic)
+            foreach (var diag in diagnostic)
             {
                 Console.WriteLine("Compilation error: " + diag.GetMessage());
             }
-
+            
             // Create instance of source generator
             SourceGenerator generator = new();
 
